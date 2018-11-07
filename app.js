@@ -52,11 +52,16 @@ app.post('/register',(req,res)=>{
 })
 // 提交登陆信息
 app.post('/login',(req,res)=>{
-    
+    const body = req.body 
+    if(body.username.trim().length <= 0 || body.password.trim().length <= 0 ) return res.send({ msg: '请填写完整的表单数据后再注册用户！', status: 501 })
+    const sql = "select count(*) as count from article where username =? and password=?"
+    conn.query(sql,[body.username,body.password],(err,result)=>{
+        // console.log(result) //[ RowDataPacket { count: 0 } ]
+        if(result[0].count == 0) return res.send({ msg: '用户名或密码不正确！', status: 400 })
+        if(err) res.send({ msg: '登陆失败请重试', status: 501 })
+        res.send({ msg: '登陆成功！', status: 200 })
+    })
 })
-
-
-
 
 app.listen(80,()=>{
     console.log('server running at http://127.0.0.1');
