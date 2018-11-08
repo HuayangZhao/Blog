@@ -16,7 +16,7 @@ app.use(
 app.set('view engine', 'ejs')
 app.set('views','./views')
 // 托管静态文件
-app.use(express.static('./node_modules'))
+app.use('/node_modules',express.static('node_modules'))
 
 // // 引入indexRouter.js路由
 // const router = require('./router/indexRouter.js')

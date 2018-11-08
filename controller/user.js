@@ -50,7 +50,7 @@ module.exports = {
             if(err) res.send({ msg: '登陆失败请重试', status: 501 })
             // 登陆成功就把用户信息添加到服务器session中
             // console.log(req.session)
-            console.log(result)
+            // console.log(result)
             req.session.user = result[0]
             req.session.islogin = true
             res.send({ msg: '登陆成功！', status: 200 })
