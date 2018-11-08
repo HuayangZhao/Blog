@@ -1,5 +1,43 @@
 <%- include('../layout/header.ejs')%>
-
-    <h1>这是文章页</h1>
-
+<link rel="stylesheet" href="/node_modules/mditor/dist/css/mditor.min.css">
+<script src="/node_modules/mditor/dist/js/mditor.min.js"></script>
+    <div class="container">
+        <h1>发起文章</h1>
+        <hr>
+        <form id="form">
+            <!-- 在请求页面的时候就把作者Id存储在隐藏域中 这样不用担心编写文章过久session过期 -->
+            <input type="hidden" name="authorId" value="<%= user.id%>">
+            <div class="form-group">
+                <label>文章标题:</label>
+                <input type="text" class="form-control" name="title">
+            </div>
+            <div class="form-group">
+                <label>文章内容:</label>
+                <textarea class="form-control" name="content" id="editor"></textarea>
+            </div>
+            <div class="form-group">
+                <input type="submit" class="btn-primary btn" value="发表文章">
+            </div>
+        </form>
+    </div>
+    <script>
+       $(function(){
+        //    初始化编辑器
+        var mditor =  Mditor.fromTextarea(document.getElementById('editor'));
+       }) 
+       $('#form').on('submit',function(e){
+        //阻止表单默认提交行为
+           e.preventDefault();
+           $.ajax({
+               url:'/article/add',
+               data:$('#form').serialize(),
+               type:'post',
+               dataType:'json',
+               success:function(result){
+                   if(result.status !== 200) return alert('添加文章失败,请重试')
+                   location.href = '/article/info/'+ result.insertId
+               }
+           })
+       })
+    </script>
 <%- include('../layout/footer.ejs')%>
