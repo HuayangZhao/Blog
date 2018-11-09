@@ -8,6 +8,7 @@ const conn = mysql.createConnection({
     password: 'root'
 })
 module.exports = {
+// 请求添加文章页
     addArticleGet(req,res){
         // 如果用户未登陆就进行拦截 重定向到根目录
         if(!req.session.islogin) return res.redirect('/')
@@ -16,6 +17,7 @@ module.exports = {
                 islogin:req.session.islogin
         })
     },
+// 发表文章
     addArticlePost(req,res){
         const body = req.body
         // body.authorId = req.session.user.id  如果文章编辑很就时间,session就会失效,会报错
@@ -29,6 +31,7 @@ module.exports = {
             // console.log(result);
         })
     },
+// 文章详情页
     articleInfoGet(req,res){
         // 获取url传递过来的ID参数
         const id = req.params.id
@@ -49,5 +52,23 @@ module.exports = {
             })
         })
        
+    },
+// 请求编辑文章页面
+    editArticleGet(req,res){
+        if(!req.session.islogin) return res.redirect('/')
+        const sql = "select * from articles where id = ?"
+        conn.query(sql,req.params.id,(err,result)=>{
+            if(err||result.length != 1) return res.redirect('/')
+            res.render('./article/editArticle.ejs',{ user:req.session.user,islogin:req.session.islogin,article:result[0]})
+        })
+        
+    },
+// 保存编辑文章
+    editArticlePost(req,res){
+        const sql = "update articles set ? where id = ?"
+        conn.query(sql,[req.body,req.body.id],(err,result)=>{
+            if(err||result.affectedRows!== 1) return res.send({msg:'保存失败',status:501})
+            res.send({ msg: 'ok', status: 200 })
+        })  
     }
 }

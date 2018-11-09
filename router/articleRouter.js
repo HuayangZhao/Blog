@@ -7,4 +7,9 @@ router.get('/article/add',ctrl.addArticleGet)
 router.post('/article/add',ctrl.addArticlePost)
 // 请求文章详情
 router.get('/article/info/:id',ctrl.articleInfoGet)
+// 请求编辑文章页
+router.get('/article/edit/:id',ctrl.editArticleGet)
+// 提交编辑文章
+router.post('/article/edit',ctrl.editArticlePost)
+
 module.exports = router
