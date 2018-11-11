@@ -1,6 +1,10 @@
 // 时间包
 const moment = require('moment')
 const mysql = require('mysql')
+// 导入加密模块
+var bcrypt = require('bcryptjs');
+// 加密强度
+var salt = bcrypt.genSaltSync(10);
 const conn = mysql.createConnection({
     host: '127.0.0.1',
     database: 'blog',
@@ -31,6 +35,9 @@ module.exports = {
             // 创建时间
             body.ctime = moment().format('YYYY-MM-DD HH:mm:ss')
             // console.log(body.ctime)
+            /*生成HASH值*/
+            body.password = hash = bcrypt.hashSync(body.password,salt);
+            // console.log(body.password )
             const sql_1 = " insert into user  set ?"
             conn.query(sql_1,body,(err,result)=>{
                 if (err) return res.send({ msg: '注册新用户失败！', status: 504 })
@@ -43,7 +50,7 @@ module.exports = {
     postLogin(req,res){
         const body = req.body 
         if(body.username.trim().length <= 0 || body.password.trim().length <= 0 ) return res.send({ msg: '请填写完整的表单数据后再注册用户！', status: 501 })
-        const sql = "select * from user where username =? and password=?"
+        const sql = "select * from user where username =?"
         conn.query(sql,[body.username,body.password],(err,result)=>{
             // console.log(result) //[ RowDataPacket { count: 0 } ]
             if(result.length !== 1) return res.send({ msg: '用户名或密码不正确！', status: 400 })
@@ -51,9 +58,15 @@ module.exports = {
             // 登陆成功就把用户信息添加到服务器session中
             // console.log(req.session)
             // console.log(result)
-            req.session.user = result[0]
-            req.session.islogin = true
-            res.send({ msg: '登陆成功！', status: 200 })
+            // 在挂在之前进行密码验证
+            bcrypt.compare(body.password, result[0].password, (err, r)=> {
+               if(err || !r) res.send({ msg: '登陆失败请重试', status: 501 })
+               req.session.user = result[0]
+               req.session.islogin = true
+               res.send({ msg: '登陆成功！', status: 200 })
+            });
+
+                
         })
     },
     getLogout(req,res){
